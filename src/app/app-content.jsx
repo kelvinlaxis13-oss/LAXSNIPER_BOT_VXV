@@ -239,7 +239,7 @@ const AppContent = observer(() => {
                     console.log('[Timeout] Active symbols loading timeout, showing dashboard');
                     setIsLoading(false);
                 }
-            }, 10000); // 10 second timeout
+            }, 5000); // 5 second timeout
         }
     };
 

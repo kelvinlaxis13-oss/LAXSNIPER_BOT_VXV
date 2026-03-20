@@ -20,8 +20,12 @@ const FreeBots = lazy(() => import('../pages/free-bots'));
 const AnalysisTool = lazy(() => import('../pages/analysis-tool'));
 const LaxSniperXV = lazy(() => import('../pages/laxsniper-xv/page'));
 
+const translations_cdn_url = process.env.TRANSLATIONS_CDN_URL || 'https://translations.deriv.com';
+const r2_project_name = process.env.R2_PROJECT_NAME || 'deriv-bot';
+const crowdin_branch_name = process.env.CROWDIN_BRANCH_NAME || 'master';
+
 const i18nInstance = initializeI18n({
-    cdnUrl: `${process.env.TRANSLATIONS_CDN_URL}/${process.env.R2_PROJECT_NAME}/${process.env.CROWDIN_BRANCH_NAME}`,
+    cdnUrl: `${translations_cdn_url}/${r2_project_name}/${crowdin_branch_name}`,
 });
 
 // Simple Suspense wrapper without timeout that causes dark landing page

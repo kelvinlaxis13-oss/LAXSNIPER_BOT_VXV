@@ -127,10 +127,22 @@ export const AuthWrapper = () => {
         initializeAuth();
     }, [loginInfo, paramsToDelete, isOnline]);
 
-    // Add timeout for offline scenarios to prevent infinite loading
+    // Add 5-second global safety timeout to prevent infinite loading no matter what
+    React.useEffect(() => {
+        const safetyTimeout = setTimeout(() => {
+            if (!isAuthComplete) {
+                console.warn('[Auth] Safety timeout reached, forcing auth completion');
+                setIsAuthComplete(true);
+            }
+        }, 5000); // 5s global fallback
+        
+        return () => clearTimeout(safetyTimeout);
+    }, [isAuthComplete]);
+
+    // Add immediate timeout for offline scenarios
     React.useEffect(() => {
         if (!isOnline && !isAuthComplete) {
-            console.log('[Auth] Offline detected, setting auth timeout');
+            console.log('[Auth] Offline detected, setting 2s auth timeout');
             const timeout = setTimeout(() => {
                 console.log('[Auth] Offline timeout reached, proceeding without full auth');
                 setIsAuthComplete(true);

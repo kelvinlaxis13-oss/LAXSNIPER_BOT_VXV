@@ -114,7 +114,11 @@ class APIBase {
 
         if (V2GetActiveToken()) {
             setIsAuthorizing(true);
-            await this.authorizeAndSubscribe();
+            // Add a timeout to authorizeAndSubscribe to prevent it from hanging indefinitely
+            const authPromise = this.authorizeAndSubscribe();
+            const timeoutPromise = new Promise(resolve => setTimeout(() => resolve('timeout'), 5000));
+            
+            await Promise.race([authPromise, timeoutPromise]);
         }
 
         chart_api.init(force_create_connection);
