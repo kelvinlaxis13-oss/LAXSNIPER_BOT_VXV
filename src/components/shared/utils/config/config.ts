@@ -179,7 +179,7 @@ export const generateOAuthURL = () => {
         } else {
             // Fallback to original logic for other domains
             const current_domain = getCurrentProductionDomain();
-            if (current_domain) {
+            if (current_domain && current_domain.includes('deriv')) {
                 const domain_suffix = current_domain.replace(/^[^.]+\./, '');
                 original_url.hostname = `oauth.${domain_suffix}`;
             }
