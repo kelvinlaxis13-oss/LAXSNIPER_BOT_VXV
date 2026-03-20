@@ -42,7 +42,11 @@ export default defineConfig({
             'process.env.GROWTHBOOK_CLIENT_KEY': JSON.stringify(process.env.GROWTHBOOK_CLIENT_KEY),
             'process.env.GROWTHBOOK_DECRYPTION_KEY': JSON.stringify(process.env.GROWTHBOOK_DECRYPTION_KEY),
             'process.env.NEXT_PUBLIC_DERIV_APP_ID': JSON.stringify(process.env.NEXT_PUBLIC_DERIV_APP_ID || 122697),
+            'process.env.NEXT_PUBLIC_BACKEND_URL': JSON.stringify(process.env.NEXT_PUBLIC_BACKEND_URL),
+            'process.env.NEXT_PUBLIC_RELAY_URL': JSON.stringify(process.env.NEXT_PUBLIC_RELAY_URL),
         },
+    },
+    resolve: {
         alias: {
             react: path.resolve('./node_modules/react'),
             'react-dom': path.resolve('./node_modules/react-dom'),

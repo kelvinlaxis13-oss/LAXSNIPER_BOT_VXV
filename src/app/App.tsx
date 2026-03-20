@@ -20,9 +20,8 @@ const FreeBots = lazy(() => import('../pages/free-bots'));
 const AnalysisTool = lazy(() => import('../pages/analysis-tool'));
 const LaxSniperXV = lazy(() => import('../pages/laxsniper-xv/page'));
 
-const { TRANSLATIONS_CDN_URL, R2_PROJECT_NAME, CROWDIN_BRANCH_NAME } = process.env;
 const i18nInstance = initializeI18n({
-    cdnUrl: `${TRANSLATIONS_CDN_URL}/${R2_PROJECT_NAME}/${CROWDIN_BRANCH_NAME}`,
+    cdnUrl: `${process.env.TRANSLATIONS_CDN_URL}/${process.env.R2_PROJECT_NAME}/${process.env.CROWDIN_BRANCH_NAME}`,
 });
 
 // Simple Suspense wrapper without timeout that causes dark landing page

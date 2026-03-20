@@ -1,6 +1,6 @@
 import { TrackJS } from 'trackjs';
 
-const { TRACKJS_TOKEN } = process.env;
+
 
 /**
  * Custom hook to initialize TrackJS.
@@ -17,7 +17,7 @@ const useTrackjs = () => {
                     application: 'standalone-deriv-bot',
                     dedupe: false,
                     enabled: isProduction,
-                    token: TRACKJS_TOKEN!,
+                    token: process.env.TRACKJS_TOKEN!,
                     userId: loginid,
                     version:
                         (document.querySelector('meta[name=version]') as HTMLMetaElement)?.content ?? trackjs_version,
