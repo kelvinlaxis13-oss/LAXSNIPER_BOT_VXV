@@ -16,6 +16,7 @@ import { AppLogo } from '../app-logo';
 import AccountsInfoLoader from './account-info-loader';
 import AccountSwitcher from './account-switcher';
 import MobileMenu from './mobile-menu';
+import useActiveAccount from '@/hooks/api/account/useActiveAccount';
 import './header.scss';
 
 type TAppHeaderProps = {
@@ -24,10 +25,12 @@ type TAppHeaderProps = {
 
 const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
     const { isDesktop } = useDevice();
-    const { isAuthorizing, activeLoginid, accountList } = useApiBase();
+    const { isAuthorizing, activeLoginid } = useApiBase();
     const { client } = useStore() ?? {};
 
-    const activeAccount = accountList?.find(account => account.loginid === activeLoginid);
+    const { data: activeAccount } = useActiveAccount({ 
+        allBalanceData: client?.all_accounts_balance ?? null 
+    });
 
     const { isSingleLoggingIn } = useOauth2();
 
@@ -40,19 +43,26 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
         if (!store) return null;
 
         const { client } = store;
+        const is_logged_in = client.is_logged_in || !!localStorage.getItem('authToken');
 
-        // Show loader during authentication processes
-        if (isAuthenticating || isAuthorizing || (isSingleLoggingIn && !is_tmb_enabled)) {
+        console.log('[Header] Auth State:', {
+            is_logged_in,
+            hasActiveAccount: !!activeAccount,
+            hasAuthToken: !!localStorage.getItem('authToken'),
+            clientLoginid: client?.loginid
+        });
+
+        // Show loader during authentication processes or while waiting for account data
+        if (
+            isAuthenticating ||
+            isAuthorizing ||
+            (isSingleLoggingIn && !is_tmb_enabled) ||
+            (is_logged_in && !activeAccount)
+        ) {
             return <AccountsInfoLoader isLoggedIn isMobile={!isDesktop} speed={3} />;
         }
 
-        // If we have an active loginid but no activeAccount yet (still loading account list)
-        // show the loader instead of falling back to login buttons
-        if (activeLoginid && !activeAccount) {
-            return <AccountsInfoLoader isLoggedIn isMobile={!isDesktop} speed={3} />;
-        }
-
-        if (activeLoginid && activeAccount) {
+        if (activeAccount) {
             return <AccountSwitcher activeAccount={activeAccount} />;
         }
 

@@ -59,6 +59,18 @@ const CoreStoreProvider: React.FC<{ children: React.ReactNode }> = observer(({ c
     );
 
     useEffect(() => {
+        // Debugging logs for authentication
+        const authToken = localStorage.getItem('authToken');
+        const storageLoginid = localStorage.getItem('active_loginid');
+        console.log('[CoreStoreProvider] Auth Debug:', {
+            hasAuthToken: !!authToken,
+            storageLoginid,
+            isLoggedIn: client?.is_logged_in,
+            activeLoginidFromHook: activeLoginid
+        });
+    }, [client?.is_logged_in, activeLoginid]);
+
+    useEffect(() => {
         const currentBalanceData = client?.all_accounts_balance?.accounts?.[activeAccount?.loginid ?? ''];
         if (currentBalanceData) {
             client?.setBalance(currentBalanceData.balance.toFixed(getDecimalPlaces(currentBalanceData.currency)));
@@ -69,11 +81,37 @@ const CoreStoreProvider: React.FC<{ children: React.ReactNode }> = observer(({ c
     }, [activeAccount?.loginid, client?.all_accounts_balance]);
 
     useEffect(() => {
+        if (!client) return;
+
         const authToken = localStorage.getItem('authToken');
-        if (client && (activeAccount || authToken)) {
-            if (activeLoginid) client.setLoginId(activeLoginid);
-            if (accountList.length > 0) client.setAccountList(accountList);
+        const storageLoginid = localStorage.getItem('active_loginid');
+        const storageAccountList = JSON.parse(localStorage.getItem('clientAccounts') || '{}');
+        const accountsList = JSON.parse(localStorage.getItem('accountsList') || '{}');
+
+        if (authToken) {
             client.setIsLoggedIn(true);
+            
+            // Bootstrap login ID
+            const loginidToSet = activeLoginid || storageLoginid;
+            if (loginidToSet) {
+                client.setLoginId(loginidToSet);
+            }
+
+            // Bootstrap account list
+            if (accountList.length > 0) {
+                client.setAccountList(accountList);
+            } else if (Object.keys(storageAccountList).length > 0) {
+                // Convert simple format to the one expected by ClientStore if needed, 
+                // but ClientStore.setAccountList handles an array.
+                // clientAccounts in localStorage is an object { [loginid]: { loginid, token, currency } }
+                const formattedAccounts = Object.values(storageAccountList).map((acc: any) => ({
+                    loginid: acc.loginid,
+                    currency: acc.currency,
+                    token: acc.token,
+                    // Minimal fields to satisfy the switcher
+                })) as any;
+                client.setAccountList(formattedAccounts);
+            }
         }
     }, [accountList, activeAccount, activeLoginid, client]);
 
