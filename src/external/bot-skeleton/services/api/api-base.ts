@@ -180,6 +180,9 @@ class APIBase {
                     }
                 } else {
                     console.error('Authorization error:', error);
+                    if (typeof window !== 'undefined') {
+                        (window as any).last_auth_error = error;
+                    }
                 }
                 setIsAuthorizing(false);
                 return error;

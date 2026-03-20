@@ -69,10 +69,11 @@ const CoreStoreProvider: React.FC<{ children: React.ReactNode }> = observer(({ c
     }, [activeAccount?.loginid, client?.all_accounts_balance]);
 
     useEffect(() => {
-        if (client && activeAccount) {
-            client?.setLoginId(activeLoginid);
-            client?.setAccountList(accountList);
-            client?.setIsLoggedIn(true);
+        const authToken = localStorage.getItem('authToken');
+        if (client && (activeAccount || authToken)) {
+            if (activeLoginid) client.setLoginId(activeLoginid);
+            if (accountList.length > 0) client.setAccountList(accountList);
+            client.setIsLoggedIn(true);
         }
     }, [accountList, activeAccount, activeLoginid, client]);
 
