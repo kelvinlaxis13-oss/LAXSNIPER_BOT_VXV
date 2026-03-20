@@ -1,0 +1,44 @@
+.app-header__menu {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    height: 32px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    margin: 0 4px;
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    .derivs-text {
+        color: #94a3b8 !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+        letter-spacing: 0.8px;
+        transition: all 0.3s ease;
+    }
+
+    &--active {
+        background: rgba(50, 197, 255, 0.15) !important;
+        box-shadow: 0 0 15px rgba(50, 197, 255, 0.4), inset 0 0 5px rgba(50, 197, 255, 0.2);
+        
+        .derivs-text {
+            color: #fff !important;
+            text-shadow: 0 0 8px rgba(50, 197, 255, 0.8);
+        }
+
+        svg {
+            fill: #fff !important;
+            filter: drop-shadow(0 0 5px rgba(50, 197, 255, 0.6));
+        }
+    }
+
+    &:hover:not(&--active) {
+        background: rgba(255, 255, 255, 0.08);
+        
+        .derivs-text {
+            color: #fff !important;
+        }
+    }
+}
