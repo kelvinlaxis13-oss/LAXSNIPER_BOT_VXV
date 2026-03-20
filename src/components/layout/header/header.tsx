@@ -15,9 +15,7 @@ import { useDevice } from '@deriv-com/ui';
 import { AppLogo } from '../app-logo';
 import AccountsInfoLoader from './account-info-loader';
 import AccountSwitcher from './account-switcher';
-import MenuItems from './menu-items';
 import MobileMenu from './mobile-menu';
-import PlatformSwitcher from './platform-switcher';
 import './header.scss';
 
 type TAppHeaderProps = {
@@ -62,6 +60,7 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
             <div className='auth-actions'>
                 <Button
                     tertiary
+                    className='header-login-btn'
                     onClick={async () => {
                         clearAuthData(false);
                         const getQueryParams = new URLSearchParams(window.location.search);
@@ -99,6 +98,7 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
                 </Button>
                 <Button
                     primary
+                    className='header-signup-btn'
                     onClick={() => {
                         window.open(standalone_routes.signup);
                     }}
@@ -130,8 +130,6 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
             <div className='header-container flex items-center justify-between w-full px-4 h-12 bg-[#000000] border-b border-[#1a2332]'>
                 <div className='header-left flex items-center gap-6 h-full'>
                     <AppLogo />
-                    {isDesktop && <MenuItems />}
-                    {isDesktop && <PlatformSwitcher />}
                 </div>
                 <div className='header-right flex items-center gap-4 h-full'>
                     {!isDesktop && <PWAInstallButton variant='primary' size='medium' />}

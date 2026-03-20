@@ -305,11 +305,41 @@
 
 .auth-actions {
     display: flex;
-    padding-block: 8px;
+    align-items: center;
+    gap: 12px;
+
+    .header-login-btn {
+        background: transparent !important;
+        border: 1px solid #32c5ff !important;
+        
+        .dc-btn__text {
+            color: #32c5ff !important;
+            font-weight: 600 !important;
+        }
+
+        &:hover {
+            background-color: rgba(50, 197, 255, 0.1) !important;
+        }
+    }
+
+    .header-signup-btn {
+        background: #32c5ff !important;
+        border: none !important;
+
+        .dc-btn__text {
+            color: #000000 !important;
+            font-weight: 700 !important;
+        }
+
+        &:hover {
+            background-color: #2ab0e6 !important;
+        }
+    }
 
     button {
-        font-weight: 400;
-        margin-inline-end: 1.6rem;
+        height: 32px !important;
+        padding: 0 16px !important;
+        border-radius: 6px !important;
     }
 }
 
