@@ -247,12 +247,29 @@ const AppContent = observer(() => {
         if (is_api_initialized) {
             init();
             setIsLoading(true);
+            
+            // Safety timeout: Ensure loading is cleared after 5s regardless of API state
+            const safetyTimeout = setTimeout(() => {
+                if (is_loading) {
+                    console.warn('[AppContent] Initialization safety timeout reached, forcing dashboard view');
+                    setIsLoading(false);
+                }
+            }, 5000);
+
             if (!client.is_logged_in) {
                 changeActiveSymbolLoadingState();
             }
+
+            return () => clearTimeout(safetyTimeout);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [is_api_initialized]);
+
+    React.useEffect(() => {
+        if (is_eu_error_loading) {
+            setIsLoading(false);
+        }
+    }, [is_eu_error_loading]);
 
     // use is_landing_company_loaded to know got details of accounts to identify should show an error or not
     React.useEffect(() => {
