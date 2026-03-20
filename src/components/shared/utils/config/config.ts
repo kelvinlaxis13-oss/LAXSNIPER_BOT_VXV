@@ -83,7 +83,9 @@ export const getAppId = () => {
     const config_app_id = window.localStorage.getItem('config.app_id');
     const current_domain = getCurrentProductionDomain() ?? '';
 
-    if (config_app_id) {
+    if (process.env.NEXT_PUBLIC_DERIV_APP_ID) {
+        app_id = process.env.NEXT_PUBLIC_DERIV_APP_ID;
+    } else if (config_app_id) {
         app_id = config_app_id;
     } else if (isStaging()) {
         app_id = APP_IDS.STAGING;
@@ -147,6 +149,12 @@ export const generateOAuthURL = () => {
     const oauth_url = getOauthURL();
     const original_url = new URL(oauth_url);
     const hostname = window.location.hostname;
+
+    // Ensure the correct App ID is used
+    const app_id = getAppId();
+    if (app_id) {
+        original_url.searchParams.set('app_id', app_id.toString());
+    }
 
     // First priority: Check for configured server URLs (for QA/testing environments)
     const configured_server_url = (LocalStorageUtils.getValue(LocalStorageConstants.configServerURL) ||

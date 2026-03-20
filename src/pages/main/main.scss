@@ -206,10 +206,15 @@
                     &__tabs {
                         display: flex;
                         justify-content: space-between;
+                        flex-direction: column;
+                        overflow-y: auto;
+                        height: 100%;
+                        padding-top: 60px; // Ensure content is below the fixed tabs
 
                         @include mobile-or-tablet-screen {
                             flex-direction: column;
                             background-color: var(--general-section-1);
+                            padding-top: 50px;
                         }
                     }
                 }

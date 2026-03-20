@@ -1,3 +1,13 @@
 .main-body {
     flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 1.6rem;
+    height: 100%; // Ensure it fills the flex container
+
+    @media (max-width: 768px) {
+        padding: 1rem;
+        padding-bottom: 5rem; // Extra space at bottom for mobile
+    }
 }

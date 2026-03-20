@@ -20,7 +20,7 @@ export default function LaxSniperXV() {
     const { status, account, ticks } = useDerivStore();
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-20 max-w-[1400px] mx-auto w-full">
             {/* Page Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
