@@ -1,8 +1,7 @@
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginSass } from '@rsbuild/plugin-sass';
-
-const path = require('path');
+import path from 'path';
 
 export default defineConfig({
     plugins: [
