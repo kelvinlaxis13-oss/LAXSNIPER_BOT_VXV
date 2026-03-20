@@ -1,33 +1,68 @@
 import React from 'react';
+import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
+import Text from '@/components/shared_ui/text';
 import { useStore } from '@/hooks/useStore';
 import { localize } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
 import OnboardTourHandler from '../tutorials/dbot-tours/onboarding-tour';
+import Announcements from './announcements';
 import Cards from './cards';
+import InfoPanel from './info-panel';
 
 const DashboardComponent = observer(() => {
-    const store = useStore();
-    if (!store) return null;
-    const { dashboard } = store;
-    const { active_tab } = dashboard;
-    const { isDesktop } = useDevice();
+    const { load_modal, dashboard, client } = useStore();
+    const { dashboard_strategies } = load_modal;
+    const { active_tab, active_tour } = dashboard;
+    const has_dashboard_strategies = !!dashboard_strategies?.length;
+    const { isDesktop, isTablet } = useDevice();
 
     return (
         <React.Fragment>
-            <div className='flex flex-col items-center justify-center min-h-[calc(100vh-48px)] p-8 bg-[#0a0a0b]'>
-                <div className='max-w-7xl mx-auto w-full'>
-                    <div className='mb-12'>
-                        <h1 className='text-5xl font-black bg-gradient-to-r from-teal-300 to-teal-500 bg-clip-text text-transparent mb-4 tracking-tight tracking-[-0.04em]'>
-                            {localize('System Overview')}
-                        </h1>
-                        <p className='text-gray-400 text-xl font-medium tracking-wide opacity-80'>
-                            {localize('Real-time performance and system health monitoring.')}
-                        </p>
+            <div
+                className={classNames('tab__dashboard', {
+                    'tab__dashboard--tour-active': active_tour,
+                })}
+            >
+                <div className='tab__dashboard__content'>
+                    {client.is_logged_in && (
+                        <Announcements is_mobile={!isDesktop} is_tablet={isTablet} />
+                    )}
+                    <div className='quick-panel'>
+                        <div
+                            className={classNames('tab__dashboard__header', {
+                                'tab__dashboard__header--listed': isDesktop && has_dashboard_strategies,
+                            })}
+                        >
+                            {!has_dashboard_strategies && (
+                                <Text
+                                    className='title'
+                                    as='h2'
+                                    color='prominent'
+                                    size={isDesktop ? 'sm' : 's'}
+                                    lineHeight='xxl'
+                                    weight='bold'
+                                >
+                                    {localize('Load or build your bot')}
+                                </Text>
+                            )}
+                            <Text
+                                as='p'
+                                color='prominent'
+                                lineHeight='s'
+                                size={isDesktop ? 's' : 'xxs'}
+                                className={classNames('subtitle', { 'subtitle__has-list': has_dashboard_strategies })}
+                            >
+                                {localize(
+                                    'Import a bot from your computer or Google Drive, build it from scratch, or start with a quick strategy.'
+                                )}
+                            </Text>
+                        </div>
+                        <Cards has_dashboard_strategies={has_dashboard_strategies} is_mobile={!isDesktop} />
                     </div>
-                    <Cards is_mobile={!isDesktop} />
                 </div>
             </div>
+            <InfoPanel />
             {active_tab === 0 && <OnboardTourHandler is_mobile={!isDesktop} />}
         </React.Fragment>
     );

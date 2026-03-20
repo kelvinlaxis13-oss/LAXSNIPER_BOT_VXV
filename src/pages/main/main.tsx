@@ -72,7 +72,7 @@ const AppWrapper = observer(() => {
     const { clear } = summary_card;
     const { DASHBOARD, BOT_BUILDER } = DBOT_TABS;
     const init_render = React.useRef(true);
-    const hash = ['dashboard', 'bot_builder', 'chart', 'tutorial', 'free_bots', 'analysis_tool', 'laxsniper_xv', 'admin'];
+    const hash = ['dashboard', 'bot_builder', 'chart', 'tutorial', 'free_bots', 'analysis_tool', 'laxsniper_xv'];
     const { isDesktop } = useDevice();
     const location = useLocation();
     const navigate = useNavigate();
@@ -315,9 +315,7 @@ const AppWrapper = observer(() => {
                                     </>
                                 }
                                 id='id-bot-builder'
-                            >
-                                <BotBuilder />
-                            </div>
+                            />
                             <div
                                 label={
                                     <>
@@ -434,34 +432,6 @@ const AppWrapper = observer(() => {
                                     </Suspense>
                                 </div>
                             </div>
-                            {/* ADMIN TAB: Visible only to Admin accounts. 
-                                The user will later provide specific loginIDs for this. */}
-                            {/* ADMIN TAB: Visible only to Admin accounts. */}
-                            {(useDerivStore().account?.loginid === 'CR8970194' || process.env.NODE_ENV === 'development') && (
-                                <div
-                                    label={
-                                        <>
-                                            <LabelPairedObjectsColumnCaptionRegularIcon
-                                                height='24px'
-                                                width='24px'
-                                                fill='var(--text-general)'
-                                            />
-                                            <Localize i18n_default_text='Admin' />
-                                        </>
-                                    }
-                                    id='id-admin'
-                                >
-                                    <div className='admin-wrapper'>
-                                        <Suspense
-                                            fallback={
-                                                <ChunkLoader message={localize('Please wait, loading Admin...')} />
-                                            }
-                                        >
-                                            <Admin />
-                                        </Suspense>
-                                    </div>
-                                </div>
-                            )}
                         </Tabs>
                         {!isDesktop && right_tab_shadow && <span className='tabs-shadow tabs-shadow--right' />}{' '}
                     </div>
@@ -470,12 +440,12 @@ const AppWrapper = observer(() => {
             <DesktopWrapper>
                 <div className='main__run-strategy-wrapper'>
                     <RunStrategy />
-                    {active_tab !== DASHBOARD && <RunPanel />}
+                    <RunPanel />
                 </div>
                 <ChartModal />
                 <TradingViewModal />
             </DesktopWrapper>
-            <MobileWrapper>{!is_open && active_tab !== DASHBOARD && <RunPanel />}</MobileWrapper>
+            <MobileWrapper>{!is_open && <RunPanel />}</MobileWrapper>
             <Dialog
                 cancel_button_text={cancel_button_text || localize('Cancel')}
                 className='dc-dialog__wrapper--fixed'

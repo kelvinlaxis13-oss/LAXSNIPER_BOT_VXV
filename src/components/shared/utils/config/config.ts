@@ -179,9 +179,19 @@ export const generateOAuthURL = () => {
         } else {
             // Fallback to original logic for other domains
             const current_domain = getCurrentProductionDomain();
-            if (current_domain && current_domain.includes('deriv')) {
+            if (current_domain) {
+                const is_production =
+                    current_domain.endsWith('.vercel.app') ||
+                    current_domain === 'bot.deriv.com' ||
+                    current_domain === 'dbot.deriv.com';
+
                 const domain_suffix = current_domain.replace(/^[^.]+\./, '');
-                original_url.hostname = `oauth.${domain_suffix}`;
+                const oauth_domain = is_production
+                    ? current_domain.includes('deriv')
+                        ? `oauth.${domain_suffix}`
+                        : 'oauth.deriv.com'
+                    : 'oauth.deriv.com';
+                original_url.hostname = oauth_domain;
             }
         }
     }

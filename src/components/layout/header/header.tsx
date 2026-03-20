@@ -9,12 +9,16 @@ import { useApiBase } from '@/hooks/useApiBase';
 import { useStore } from '@/hooks/useStore';
 import useTMB from '@/hooks/useTMB';
 import { clearAuthData, handleOidcAuthFailure } from '@/utils/auth-utils';
+import { StandaloneCircleUserRegularIcon } from '@deriv/quill-icons/Standalone';
 import { requestOidcAuthentication } from '@deriv-com/auth-client';
-import { Localize } from '@deriv-com/translations';
-import { useDevice } from '@deriv-com/ui';
+import { Localize, useTranslations } from '@deriv-com/translations';
+import { Header, Tooltip, useDevice, Wrapper } from '@deriv-com/ui';
+import { useFirebaseCountriesConfig } from '@/hooks/firebase/useFirebaseCountriesConfig';
 import { AppLogo } from '../app-logo';
 import AccountsInfoLoader from './account-info-loader';
 import AccountSwitcher from './account-switcher';
+import MenuItems from './menu-items';
+import PlatformSwitcher from './platform-switcher';
 import MobileMenu from './mobile-menu';
 import useActiveAccount from '@/hooks/api/account/useActiveAccount';
 import './header.scss';
@@ -28,105 +32,167 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
     const { isAuthorizing, activeLoginid } = useApiBase();
     const { client } = useStore() ?? {};
 
-    const { data: activeAccount } = useActiveAccount({ 
-        allBalanceData: client?.all_accounts_balance ?? null 
-    });
+    const { data: activeAccount } = useActiveAccount({ allBalanceData: client?.all_accounts_balance });
+    const { accounts, getCurrency, is_virtual } = client ?? {};
+    const has_wallet = Object.keys(accounts ?? {}).some(id => accounts?.[id].account_category === 'wallet');
+
+    const currency = getCurrency?.();
+    const { localize } = useTranslations();
 
     const { isSingleLoggingIn } = useOauth2();
 
+    const { hubEnabledCountryList } = useFirebaseCountriesConfig();
     const { onRenderTMBCheck, isTmbEnabled } = useTMB();
     const is_tmb_enabled = isTmbEnabled() || window.is_tmb_enabled === true;
-    // No need for additional state management here since we're handling it in the layout component
 
     const renderAccountSection = useCallback(() => {
-        const store = useStore();
-        if (!store) return null;
-
-        const { client } = store;
-        const is_logged_in = client.is_logged_in || !!localStorage.getItem('authToken');
-
-        console.log('[Header] Auth State:', {
-            is_logged_in,
-            hasActiveAccount: !!activeAccount,
-            hasAuthToken: !!localStorage.getItem('authToken'),
-            clientLoginid: client?.loginid
-        });
-
-        // Show loader during authentication processes or while waiting for account data
-        if (
-            isAuthenticating ||
-            isAuthorizing ||
-            (isSingleLoggingIn && !is_tmb_enabled) ||
-            (is_logged_in && !activeAccount)
-        ) {
+        // Show loader during authentication processes
+        if (isAuthenticating || isAuthorizing || (isSingleLoggingIn && !is_tmb_enabled)) {
             return <AccountsInfoLoader isLoggedIn isMobile={!isDesktop} speed={3} />;
-        }
+        } else if (activeLoginid) {
+            return (
+                <>
+                    {isDesktop &&
+                        (has_wallet ? (
+                            <Button
+                                className='manage-funds-button'
+                                has_effect
+                                text={localize('Manage funds')}
+                                onClick={() => {
+                                    let redirect_url = new URL(standalone_routes.wallets_transfer);
+                                    const is_hub_enabled_country = hubEnabledCountryList.includes(
+                                        client?.residence || ''
+                                    );
+                                    if (is_hub_enabled_country) {
+                                        redirect_url = new URL(standalone_routes.recent_transactions);
+                                    }
+                                    if (is_virtual) {
+                                        redirect_url.searchParams.set('account', 'demo');
+                                    } else if (currency) {
+                                        redirect_url.searchParams.set('account', currency);
+                                    }
+                                    window.location.assign(redirect_url.toString());
+                                }}
+                                primary
+                            />
+                        ) : (
+                            <Button
+                                primary
+                                onClick={() => {
+                                    const redirect_url = new URL(standalone_routes.cashier_deposit);
+                                    if (currency) {
+                                        redirect_url.searchParams.set('account', currency);
+                                    }
+                                    window.location.assign(redirect_url.toString());
+                                }}
+                                className='deposit-button'
+                            >
+                                {localize('Deposit')}
+                            </Button>
+                        ))}
 
-        if (activeAccount) {
-            return <AccountSwitcher activeAccount={activeAccount} />;
-        }
+                    <AccountSwitcher activeAccount={activeAccount} />
 
-        return (
-            <div className='auth-actions'>
-                <Button
-                    tertiary
-                    className='header-login-btn'
-                    onClick={async () => {
-                        clearAuthData(false);
-                        const getQueryParams = new URLSearchParams(window.location.search);
-                        const currency = getQueryParams.get('account') ?? '';
-                        const query_param_currency =
-                            currency || sessionStorage.getItem('query_param_currency') || 'USD';
+                    {isDesktop &&
+                        (() => {
+                            let redirect_url = new URL(standalone_routes.personal_details);
+                            const is_hub_enabled_country = hubEnabledCountryList.includes(client?.residence || '');
 
-                        try {
-                            const tmbEnabled = await isTmbEnabled();
-                            if (tmbEnabled) {
-                                await onRenderTMBCheck(true);
-                            } else {
-                                try {
-                                    await requestOidcAuthentication({
-                                        redirectCallbackUri: `${window.location.origin}/callback`,
-                                        ...(query_param_currency
-                                            ? {
-                                                  state: {
-                                                      account: query_param_currency,
-                                                  },
-                                              }
-                                            : {}),
-                                    });
-                                } catch (err) {
-                                    handleOidcAuthFailure(err);
-                                    window.location.replace(generateOAuthURL());
-                                }
+                            if (has_wallet && is_hub_enabled_country) {
+                                redirect_url = new URL(standalone_routes.account_settings);
                             }
-                        } catch (error) {
-                            console.error(error);
-                        }
-                    }}
-                >
-                    <Localize i18n_default_text='Log in' />
-                </Button>
-                <Button
-                    primary
-                    className='header-signup-btn'
-                    onClick={() => {
-                        window.open(standalone_routes.signup);
-                    }}
-                >
-                    <Localize i18n_default_text='Sign up' />
-                </Button>
-            </div>
-        );
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const account_param = urlParams.get('account');
+                            const is_virtual_account = client?.is_virtual || account_param === 'demo';
+
+                            if (is_virtual_account) {
+                                redirect_url.searchParams.set('account', 'demo');
+                            } else if (currency) {
+                                redirect_url.searchParams.set('account', currency);
+                            }
+                            return (
+                                <Tooltip
+                                    as='a'
+                                    href={redirect_url.toString()}
+                                    tooltipContent={localize('Manage account settings')}
+                                    tooltipPosition='bottom'
+                                    className='app-header__account-settings'
+                                >
+                                    <StandaloneCircleUserRegularIcon className='app-header__profile_icon' />
+                                </Tooltip>
+                            );
+                        })()}
+                </>
+            );
+        } else {
+            return (
+                <div className='auth-actions'>
+                    <Button
+                        tertiary
+                        className='header-login-btn'
+                        onClick={async () => {
+                            clearAuthData(false);
+                            const getQueryParams = new URLSearchParams(window.location.search);
+                            const currency = getQueryParams.get('account') ?? '';
+                            const query_param_currency =
+                                currency || sessionStorage.getItem('query_param_currency') || 'USD';
+
+                            try {
+                                const tmbEnabled = await isTmbEnabled();
+                                if (tmbEnabled) {
+                                    await onRenderTMBCheck(true);
+                                } else {
+                                    try {
+                                        await requestOidcAuthentication({
+                                            redirectCallbackUri: `${window.location.origin}/callback`,
+                                            ...(query_param_currency
+                                                ? {
+                                                      state: {
+                                                          account: query_param_currency,
+                                                      },
+                                                  }
+                                                : {}),
+                                        });
+                                    } catch (err) {
+                                        handleOidcAuthFailure(err);
+                                        window.location.replace(generateOAuthURL());
+                                    }
+                                }
+                            } catch (error) {
+                                console.error(error);
+                            }
+                        }}
+                    >
+                        <Localize i18n_default_text='Log in' />
+                    </Button>
+                    <Button
+                        primary
+                        className='header-signup-btn'
+                        onClick={() => {
+                            window.open(standalone_routes.signup);
+                        }}
+                    >
+                        <Localize i18n_default_text='Sign up' />
+                    </Button>
+                </div>
+            );
+        }
     }, [
         isAuthenticating,
         isAuthorizing,
         isSingleLoggingIn,
         isDesktop,
         activeLoginid,
-        activeAccount,
         standalone_routes,
+        client,
+        has_wallet,
+        currency,
+        localize,
+        activeAccount,
+        is_virtual,
         onRenderTMBCheck,
         is_tmb_enabled,
+        hubEnabledCountryList,
     ]);
 
     if (client?.should_hide_header) return null;
@@ -140,6 +206,8 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
             <div className='header-container flex items-center justify-between w-full px-4 h-12 bg-[#000000] border-b border-[#1a2332]'>
                 <div className='header-left flex items-center gap-6 h-full'>
                     <AppLogo />
+                    {isDesktop && <MenuItems />}
+                    {isDesktop && <PlatformSwitcher />}
                 </div>
                 <div className='header-right flex items-center gap-4 h-full'>
                     {!isDesktop && <PWAInstallButton variant='primary' size='medium' />}

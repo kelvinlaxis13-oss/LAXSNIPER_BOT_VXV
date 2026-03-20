@@ -306,6 +306,7 @@ const AppContent = observer(() => {
                         {/* <PWAInstallModalTest /> */}
                         <Audio />
                         <Main />
+                        <BotBuilder />
                         <BotStopped />
                         <TransactionDetailsModal />
                         <PWAInstallModal />
@@ -327,6 +328,7 @@ const AppContent = observer(() => {
                     {/* <PWAInstallModalTest /> */}
                     <Audio />
                     <Main />
+                    <BotBuilder />
                     <BotStopped />
                     <TransactionDetailsModal />
                     <PWAInstallModal />
